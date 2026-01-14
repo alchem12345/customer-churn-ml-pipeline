@@ -1,19 +1,19 @@
 import yaml
 from sklearn.linear_model import LogisticRegression
 
-from src.churn.data.load_data import load_raw_data
-from src.churn.data.split import split_data
-from src.churn.features.preprocessing import build_preprocessor
-from src.churn.models.pipeline import build_pipeline
-from src.churn.models.train import train_model
-from src.churn.models.evaluate import evaluate_model
+from churn.data.load_data import load_data
+from churn.data.split import split_data
+from churn.features.preprocessing import build_preprocessor
+from churn.models.pipeline import pipeline
+from churn.models.train import train
+from churn.models.evaluate import evaluate_model
 
 model_path = "model/churn_pipeline.pkl"
 
 def main():
     config = yaml.safe_load(open("src/churn/config/config.yaml"))
 
-    df = load_raw_data(config["data"]["raw_path"])
+    df = load_data(config["data"]["raw_path"])
 
     X_train, X_test, y_train, y_test = split_data(
         df,
@@ -29,11 +29,11 @@ def main():
 
     model = LogisticRegression(**config["model"]["params"])
 
-    pipeline = build_pipeline(preprocessor, model)
+    churn_pipeline = pipeline(preprocessor, model)
 
-    pipeline = train_model(pipeline, X_train, y_train, model)
+    churn_pipeline = train(churn_pipeline, X_train, y_train, model_path)
 
-    metrics = evaluate_model(pipeline, X_test, y_test)
+    metrics = evaluate_model(churn_pipeline, X_test, y_test)
     print(metrics)
 
 if __name__ == "__main__":
